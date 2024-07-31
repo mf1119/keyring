@@ -1,3 +1,6 @@
+#CUSTOM
+arduino_firmwares/Arduino*.hex
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

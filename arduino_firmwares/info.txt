@@ -1,0 +1,5 @@
+From: https://github.com/harlequin-tech/arduino-usb
+
+sudo dfu-programmer atmega16u2 erase
+sudo dfu-programmer atmega16u2 flash Arduino-usbserial-atmega16u2-Mega2560-Rev3.hex
+sudo dfu-programmer atmega16u2 reset

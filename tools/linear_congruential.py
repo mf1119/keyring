@@ -8,17 +8,14 @@ Multiplier:     0 < a < m
 Increment:      0 <= c < m
 Seed:           0 <= X0 < m
 """
+
 import sys
 
-ASCII_CHARS = 95
-PINS = 69
-KEY_PIN = 14
-PASSWORD = "This is my password."
+CHARSET_N = r"0123456789"
+CHARSET_A = r"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+CHARSET_AN = CHARSET_N + CHARSET_A
 
-M_MOD = ASCII_CHARS
-A_MULT = PINS
-C_INCR = KEY_PIN
-SEED = len(PASSWORD)
+PINS = 69
 
 
 def val_is_in_array(arr, val, len):
@@ -28,32 +25,46 @@ def val_is_in_array(arr, val, len):
     return False
 
 
-def cipher_next_val(arr, length):
-    last_x = arr[length - 1]
-    new_x = ((A_MULT * last_x) + C_INCR) % M_MOD
-    return new_x
+def generate_cipher_linear_congruential(password, char_set, key):
+    M_MOD = len(char_set)
+    A_MULT = PINS
+    C_INCR = key
+    seed = ((A_MULT * (len(password) + key)) + C_INCR) % M_MOD
+    print(f"Seed: {seed}, {char_set[seed]}")
+    collisions = 0
 
-
-def generate_cipher(length):
-    cipher = []
-    cipher.append(SEED)
-    print(cipher[0])
-    for i in range(1, length):
+    cipher = ""
+    cipher += char_set[seed]
+    for i in range(1, len(char_set)):
         adding_iteration = 0
-        new_val = cipher_next_val(cipher, i)
-        while val_is_in_array(cipher, new_val, i):
-            new_val = (new_val + 1) % length
+        new_val_ind = ((A_MULT * char_set.index(cipher[i - 1])) + C_INCR) % M_MOD
+        while val_is_in_array(cipher, char_set[new_val_ind], i):
+            collisions += 1
+            # print(f"Collision {collisions}: {char_set[new_val_ind]}")
+
+            new_val_ind = (new_val_ind + 1) % M_MOD
             adding_iteration += 1
-            if adding_iteration > length:
+            if adding_iteration > len(char_set):
                 print("Couldn't add value! Something went wrong. :(")
                 sys.exit(-1)
-        cipher.append(new_val)
-        print(new_val)
+        # print(f"Adding: {char_set[new_val_ind]}")
+        cipher += char_set[new_val_ind]
     return cipher
 
 
+def encode_password(str, cipher, char_set):
+    encoded_string = ""
+    for c in str:
+        encoded_string += cipher[char_set.index(c)]
+    return encoded_string
+
+
 def main():
-    cipher = generate_cipher(ASCII_CHARS)
+    password = "MyPassword"
+    key = 5
+    cipher = generate_cipher_linear_congruential(password, CHARSET_AN, key)
+    print(f"Cipher: {cipher}")
+    print(f"Encoded password: {encode_password(password, cipher, CHARSET_AN)}")
 
 
 if __name__ == "__main__":
